@@ -1,0 +1,23 @@
+# Core dependencies for stock-analysis skill
+# Python 3.8+ required
+
+# Stock data fetching (Chinese A-shares)
+akshare>=1.9.0
+
+# Technical analysis indicators
+# Note: TA-Lib requires system-level installation first
+# See: https://ta-lib.org/install/
+TA-Lib>=0.4.26
+
+# Data processing
+pandas>=1.5.0
+numpy>=1.21.0
+scipy>=1.9.0
+
+# HTTP requests
+requests>=2.28.0
+
+# Optional: AI analysis (requires API keys)
+# Uncomment if you want to use AI features
+# openai>=1.0.0
+# zhipuai>=2.0.0

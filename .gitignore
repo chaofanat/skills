@@ -1,0 +1,4 @@
+stock-analysis/venv/
+stock-analysis/logs/
+*.pyc
+__pycache__/
