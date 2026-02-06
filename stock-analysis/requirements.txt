@@ -1,12 +1,15 @@
 # Core dependencies for stock-analysis skill
-# Python 3.8+ required
+# Python 3.10+ required
 
-# Stock data fetching (Chinese A-shares)
-akshare>=1.9.0
+# Stock data processing (Chinese A-shares)
+# Main package for technical analysis
+aishare-txt
 
 # Technical analysis indicators
 # Note: TA-Lib requires system-level installation first
-# See: https://ta-lib.org/install/
+# Windows: https://github.com/cgohlke/talib-build
+# Linux: sudo apt-get install ta-lib
+# macOS: brew install ta-lib
 TA-Lib>=0.4.26
 
 # Data processing

@@ -1,347 +1,450 @@
 ---
 name: stock-analysis
-description: Chinese stock technical indicator analysis and report generation. Use when users provide a Chinese stock code or name and request: (1) Technical indicator analysis, (2) Stock price/moving average analysis, (3) MACD, KDJ, RSI indicators, (4) Trading volume analysis, (5) Bollinger Bands, ATR, or other technical indicators, (6) Comprehensive stock analysis reports, (7) Price trend analysis for A-share stocks. Supports 6-digit stock codes (e.g., 000001, 600036, 603259) for Chinese A-shares.
+description: Chinese stock technical analysis with resonance-based framework (客观共振五维框架). Use when users provide Chinese stock codes and request: (1) Technical indicator analysis, (2) Stock price/MA analysis, (3) MACD/KDJ/RSI indicators, (4) Volume analysis, (5) Bollinger Bands/ATR analysis, (6) Comprehensive stock analysis reports, (7) Price trend analysis, (8) Acceleration/limit-up detection. **CORE**: Uses multi-dimensional resonance validation (客观共振) instead of subjective prediction. Framework first collects objective signals, identifies market phase, dynamically interprets signals, then derives conclusions through dimensional resonance. Supports 6-digit stock codes (e.g., 000001, 600036, 603259) for Chinese A-shares.
 ---
 
-# Stock Technical Analysis
+# Stock Technical Analysis - 客观共振五维框架
 
-Analyzes Chinese A-share stocks and generates comprehensive technical indicator reports.
+基于**多维度共振验证**的A股技术分析工具，拒绝主观预判，让信号自己说话。
 
-## Environment Setup
+## 核心设计原则
 
-This skill uses an isolated virtual environment for all dependencies.
+1. **客观信号优先**：先收集信号，不下预设结论
+2. **阶段动态适配**：根据行情阶段动态调整信号解读规则
+3. **维度共振验证**：五维相互印证，任一维度不配合即降低置信度
+4. **多空信号平等**：不提前过滤多空信号，客观记录
 
-### Step 1: Install TA-Lib (System Dependency)
+## 环境配置
 
-TA-Lib must be installed at the system level first:
+### Step 1: 安装TA-Lib（系统依赖）
 
-- **Windows**: Download precompiled wheel from https://github.com/cgohlke/talib-build and install with pip
+TA-Lib必须先在系统级别安装：
+
+- **Windows**: 从 https://github.com/cgohlke/talib-build 下载预编译wheel并用pip安装
 - **Linux**: `sudo apt-get install -y build-essential python3-dev ta-lib`
 - **macOS**: `brew install ta-lib`
 
-### Step 2: Run Setup Script
-
-Create the virtual environment and install all dependencies:
+### Step 2: 运行安装脚本
 
 ```bash
 python scripts/setup_venv.py
 ```
 
-This creates a `venv/` directory with isolated Python environment and all required packages.
+这会创建`venv/`目录并安装所有依赖。
 
-## Running Analysis
+## 运行分析
 
-### Option A: Use Convenience Scripts (Recommended)
-
-**Windows (PowerShell):**
+### Windows (PowerShell)
 ```powershell
 .\scripts\run.ps1 000001
 ```
 
-**Windows (Batch):**
+### Windows (Batch)
 ```bash
 scripts\run.bat 000001
 ```
 
-**Linux/macOS:**
+### Linux/macOS
 ```bash
 chmod +x scripts/run.sh
 ./scripts/run.sh 000001
 ```
 
-### Option B: Direct Python Execution
+### 直接运行Python
 
-**Windows:**
+**Windows**:
 ```bash
-venv\Scripts\python.exe scripts\analyze_stock.py 000001
+venv\Scripts\python.exe scripts/analyze_stock.py 000001
 ```
 
-**Linux/macOS:**
+**Linux/macOS**:
 ```bash
 venv/bin/python scripts/analyze_stock.py 000001
 ```
 
-## Example Stock Codes
+## 常用股票代码
 
-- `000001` - Ping An Bank (平安银行)
-- `600036` - China Merchants Bank (招商银行)
+- `000001` - 平安银行
+- `600036` - 招商银行
 - `603259` - 药明康德
 - `000858` - 五粮液
 
-## Execution Instructions
+## 调用说明
 
-**When invoking this skill from Claude Code:**
+**从Claude Code调用此技能时**：
 
-Always set the `USER_WORKING_DIR` environment variable to the user's current working directory before running the analysis script. This ensures reports are saved to the user's workspace.
+1. 设置`USER_WORKING_DIR`环境变量为用户当前工作目录
+2. 运行分析脚本获取原始技术数据
+3. 按照下面的**客观共振五步分析法**生成报告
+4. 保存Markdown报告到用户工作目录，文件名格式：`{code}_{股票名称}_技术分析_{时间戳}.md`
 
-**Example execution pattern:**
 ```bash
 cd C:/Users/CHAOFAN/.claude/skills/stock-analysis
-USER_WORKING_DIR={用户当前工作目录} venv/Scripts/python.exe scripts/analyze_stock.py {股票代码}
+USER_WORKING_DIR={用户工作目录} venv/Scripts/python.exe scripts/analyze_stock.py {股票代码}
 ```
 
-**After generating the analysis:**
+---
 
-1. Read the raw technical data from the script output
-2. Generate the comprehensive five-dimensional analysis report in Markdown format
-3. **Save the Markdown report** to the user's current working directory with filename: `{code}_{股票名称}_技术分析.md`
-4. Inform the user that all reports have been saved to their current directory
+## 客观共振五步分析法
 
-## Output Format
+**这是本技能的核心分析框架，必须严格按此顺序执行，不得跳步或预设结论。**
 
-Returns comprehensive technical indicator report with:
+---
 
-**Technical indicators included:**
-- **Trend**: MA (5, 10, 20, 60), Bollinger Bands
-- **Momentum**: MACD, RSI, KDJ, Williams %R, CCI
-- **Volume**: OBV, VWMA, volume ratio
-- **Volatility**: ATR, historical volatility
-- **Money Flow**: Net capital inflow, DMI (+DI, -DI, ADX)
+### 第一步：客观信号收集表 📋
 
-**Files automatically saved to user's current working directory:**
-- `stock_report_{code}_{timestamp}.txt` - Plain text report with raw technical data
-- `stock_data_{code}_{timestamp}.json` - Full JSON data for further analysis
-- `{code}_{股票名称}_技术分析.md` - Markdown format comprehensive analysis report
+**目的**：不做任何预设，客观记录五维核心的多空信号。
 
-> **重要**: 所有分析报告都会自动保存到用户当前工作目录，而非技能目录。调用脚本时需通过环境变量 `USER_WORKING_DIR` 传递用户工作目录路径。
+**原则**：
+- 只记录客观信号，不做解读
+- 多空信号平等记录，不提前过滤
+- 信号必须来自原始数据，不得主观推断
 
-## 五维技术分析框架
+#### 五维核心信号收集表
 
-当用户请求股票分析时，请按以下流程执行：
+| 维度 | 多头信号 ✅ | 空头信号 ❌ | 中性信号 ⚪ | 数据来源 |
+|------|-----------|-----------|-----------|---------|
+| **量** | [从数据中提取] | [从数据中提取] | [从数据中提取] | 量比、OBV、成交量 |
+| **价** | [从数据中提取] | [从数据中提取] | [从数据中提取] | MA排列、价格位置、布林带 |
+| **时** | [从数据中提取] | [从数据中提取] | [从数据中提取] | 近N日涨跌幅、连续涨跌日 |
+| **空** | [从数据中提取] | [从数据中提取] | [从数据中提取] | 乖离率、距前高前低距离 |
+| **势** | [从数据中提取] | [从数据中提取] | [从数据中提取] | MACD、ADX/DI、RSI、KDJ |
 
-1. **运行分析脚本**：使用 `USER_WORKING_DIR` 环境变量传递用户工作目录
-2. **读取技术数据**：解析脚本输出的原始技术指标数据
-3. **生成五维分析**：根据以下五个维度进行综合分析
-4. **保存Markdown报告**：将完整的分析报告保存为 `{code}_{股票名称}_技术分析.md` 到用户当前工作目录
-5. **确认文件保存**：告知用户所有报告文件已保存到其工作目录
+**填写示例**：
+```
+【量】
+✅ 量比1.31>1（温和放量）
+✅ OBV 5日+53.93%（资金大幅流入）
+✅ 成交量38.6万手（5日高位）
 
-请根据输出的技术数据，从以下五个维度进行综合分析：
+【价】
+✅ MA5>MA10>MA20>MA60（多头排列）
+✅ 价格28.78>所有均线（强势突破）
+✅ 突破布林上轨27.13（强势超买）
 
-### 一、趋势定方向 📈
-**核心指标**: MA均线系统、MACD、DMI/ADX
+【时】
+✅ 近5日涨幅+28.3%（加速上涨）
+✅ 连续4日收阳（时间连续性）
+❌ 5日BIAS 17.59%（短期乖离偏大）
 
-分析要点：
-- MA均线的排列形态（多头/空头/粘合）
-- 价格相对均线的位置
-- MACD的多空状态和动能变化
-- ADX反映的趋势强度
-- DI+/DI-显示的多空力量对比
+【空】
+❌ 5日BIAS 17.59%>10%（短期乖离大）
+❌ 20日BIAS 19.52%>15%（中期乖离大）
+✅ 距前高有空间（上方无强压力）
 
-### 二、动量找时机 ⚡
-**核心指标**: RSI、KDJ、布林带
+【势】
+✅ MACD HIST+0.35（多头动能）
+✅ ADX 32.6>30（强趋势）
+✅ DI+ 37.4>DI- 11.6（多头力量占优）
+❌ RSI 74.25>70（超买区间）
+❌ KDJ K87.4>80（高位钝化）
+```
 
-分析要点：
-- RSI显示的超买超卖状态
-- KDJ的金叉死叉信号
-- 布林带位置反映的强弱
-- 乖离率反映的短期超买超卖
-- 综合判断当前是否适合介入
+**统计结果**：
+- 多头信号总数：__个
+- 空头信号总数：__个
+- 中性信号总数：__个
 
-### 三、量能验真假 🔍
-**核心指标**: 成交量、OBV、量比
+---
 
-分析要点：
-- 量比反映的放量缩量情况
-- OBV变化反映的资金趋势
-- 是否存在量价背离
-- 判断当前上涨/下跌的有效性
+### 第二步：行情阶段识别 🎯
 
-### 四、资金判持续性 💰
-**核心指标**: 主力资金流、超大单
+**目的**：识别当前所处行情阶段，为下一步动态解读提供依据。
 
-分析要点：
-- 当日资金流向（主力、超大单、大单、小单）
-- 5日累计资金流向
-- 超大单（机构资金）的态度
-- 判断资金面是否支撑趋势持续
+#### 三大行情阶段识别标准
 
-### 五、波动率控风险 🎯
-**核心指标**: ATR、布林带宽度
+| 阶段 | 识别标准（满足3条以上） | 特征描述 |
+|------|---------------------|---------|
+| **震荡市** | 1.ADX<25<br>2.MA均线粘合<br>3.价格在布林带中轨附近<br>4.近10日涨跌幅<10% | 方向不明，箱体波动 |
+| **趋势加速市** | 1.ADX>25且上升<br>2.MA均线发散<br>3.价格突破布林上轨<br>4.近5日涨跌幅>10% | 方向明确，动能强劲 |
+| **反转市** | 1.原趋势衰竭<br>2.出现反向突破信号<br>3.MA即将金叉/死叉<br>4.成交量异常放大 | 趋势转换，变盘点 |
 
-分析要点：
-- ATR反映的波动水平
-- 给出具体的止损位建议
-- 给出仓位控制建议
-- 给出目标位建议
+**当前阶段判定**：_______（震荡市 / 趋势加速市 / 反转市）
 
-## 分析报告格式
+**判定依据**：
+1.
+2.
+3.
 
-请按以下Markdown格式输出五维分析报告，使用标准Markdown语法（表格、引用、代码块等）：
+---
+
+### 第三步：动态信号解读 🔄
+
+**目的**：根据行情阶段，动态调整信号的解读规则。
+
+**关键原则**：同一信号在不同阶段有完全不同的含义，绝不能用同一套规则套所有行情。
+
+#### 动态解读规则表
+
+| 信号 | 震荡市解读 | 趋势加速市解读 | 反转市解读 |
+|------|-----------|--------------|-----------|
+| **RSI>70** | ⚠️ 超买风险，可能回调 | ✅ 强势信号，可能加速 | ⚠️ 谨防假突破 |
+| **RSI<30** | ⚠️ 超卖风险，可能反弹 | ❌ 弱势信号，可能加速下跌 | ✅ 可能见底反弹 |
+| **KDJ高位** | ⚠️ 超买，回调风险大 | ✅ 强势，可能涨停 | ⚠️ 谨防诱多 |
+| **突破布林上轨** | ⚠️ 可能回归中轨 | ✅ 强势加速信号 | ⚠️ 假突破风险 |
+| **乖离率>10%** | ⚠️ 回调风险大 | ✅ 强势加速特征 | ⚠️ 谨慎追高 |
+| **资金单日流出** | 可能是出货 | 可能是洗盘 | 可能是换手 |
+| **资金5日大流入** | 可能是建仓 | ✅ 加速上涨信号 | 可能是抄底 |
+| **MACD柱扩大** | 可能是诱多 | ✅ 动能增强 | 可能是反转信号 |
+| **ADX上升** | 可能形成趋势 | ✅ 趋势加速 | 趋势可能形成 |
+
+#### 当前阶段的信号解读
+
+基于当前处于**_______阶段**，对第一步收集的信号进行动态解读：
+
+**多头信号的强度评估**：
+- [列出多头信号] → 解读：_______（强/中/弱支撑）
+
+**空头信号的强度评估**：
+- [列出空头信号] → 解读：_______（强/中/弱压制）
+
+**关键矛盾信号的处理**：
+- [如有相互矛盾的信号] → 判断：_______
+
+---
+
+### 第四步：五维共振验证 🔗
+
+**目的**：检查各维度之间是否相互印证，形成共振闭环。
+
+#### 维度联动验证表
+
+| 维度A | 维度B | 是否共振 | 验证结论 |
+|-------|-------|---------|---------|
+| 量能 | 价格 | ✅/❌ | [放量上涨/缩量上涨/放量下跌/缩量下跌] → [解读] |
+| 价格 | 趋势 | ✅/❌ | [价格站上均线/跌破均线] + [MACD多空] → [解读] |
+| 趋势 | 资金 | ✅/❌ | [趋势方向] + [资金流向] → [解读] |
+| 资金 | 量能 | ✅/❌ | [资金流向] + [OBV/成交量] → [解读] |
+| 动量 | 趋势 | ✅/❌ | [RSI/KDJ状态] + [趋势强度] → [解读] |
+
+#### 共振强度评级
+
+**共振等级判定标准**：
+- 🔴 **强共振**（5对联动全通过）：五维完全一致，剧烈变化概率极高
+- 🟠 **中等共振**（3-4对联动通过）：五维基本一致，有明显方向
+- 🟡 **弱共振**（2对联动通过）：五维部分一致，方向不确定
+- 🟢 **无共振/分歧**（<2对联动通过）：五维分歧，等待信号明确
+
+**当前共振评级**：_______
+
+**共振分析结论**：
+- 量价关系：_______
+- 资金趋势配合：_______
+- 动量趋势配合：_______
+- 综合共振状态：_______
+
+---
+
+### 第五步：结论推导与策略 📝
+
+**目的**：基于前四步的客观分析，推导最终结论和操作建议。
+
+**严禁**：在此步骤引入主观预设或与前面分析矛盾的观点。
+
+#### 综合评级标准
+
+| 共振等级 | 信号比例 | 综合评级 | 含义 |
+|---------|---------|---------|------|
+| 🔴强共振 | 多头>空头×2 | ⭐⭐⭐⭐⭐ 明确看多 | 五维共振向上，剧烈上涨概率高 |
+| 🔴强共振 | 空头>多头×2 | ⭐ 明确看空 | 五维共振向下，剧烈下跌概率高 |
+| 🟠中等共振 | 多头>空头×1.5 | ⭐⭐⭐⭐ 偏多 | 五维偏多，上涨概率较大 |
+| 🟠中等共振 | 空头>多头×1.5 | ⭐⭐ 偏空 | 五维偏空，下跌概率较大 |
+| 🟡弱共振 | 多空接近 | ⭐⭐⭐ 中性 | 五维分歧，方向不明，观望 |
+| 🟢无共振 | - | ⭐⭐⭐ 等待 | 五维混乱，等待信号明确 |
+
+**当前综合评级**：⭐⭐⭐⭐⭐ (X/5星) - _______
+
+#### 结论陈述
+
+**趋势判断**：_______（基于五维共振的客观结论，非主观预判）
+
+**时机判断**：_______（基于动量和位置）
+
+**关键验证点**（如有）：
+1.
+2.
+3.
+
+#### 操作策略
+
+**稳健型**：
+- 介入条件：_______
+- 止损位：_______
+- 目标位：_______
+- 仓位建议：_______
+
+**激进型**：
+- 介入条件：_______
+- 止损位：_______
+- 目标位：_______
+- 仓位建议：_______
+
+**⚠️ 关键风险提示**（必须基于实际信号，不得主观臆造）：
+1.
+2.
+3.
+
+---
+
+## 报告输出格式
+
+按照以下Markdown格式输出分析报告：
 
 ```markdown
-# XXXXXX 股票名称 - 五维技术分析
+# XXXXXX 股票名称 - 客观共振五维技术分析
 
 **当前价格**: XX.XX 元 | **分析日期**: YYYY-MM-DD | **所属行业**: XXXX
 
 ---
 
-## 一、趋势定方向 📈
+## 第一步：客观信号收集 📋
 
-### 📊 核心指标
+### 五维核心信号表
 
-| 指标 | 数值 | 解读 |
-|------|------|------|
-| MA排列 | MA5>MA10>... | 多头/空头/粘合 |
-| MACD | DIF:XX DEA:XX | 多头/空头动能 |
-| ADX/DI | ADX:XX DI+>DI- | 趋势强度/多空力量 |
+| 维度 | 多头信号 ✅ | 空头信号 ❌ | 数据来源 |
+|------|-----------|-----------|---------|
+| **量** | ... | ... | 量比、OBV、成交量 |
+| **价** | ... | ... | MA排列、价格位置、布林带 |
+| **时** | ... | ... | 近N日涨跌幅 |
+| **空** | ... | ... | 乖离率、距离前高前低 |
+| **势** | ... | ... | MACD、ADX/DI、RSI、KDJ |
 
-### 💡 综合分析
-
-[详细分析均线、MACD、DMI等指标的综合表现，判断趋势方向和强度]
-
-**✅ 趋势判断**: [明确看多/偏多/中性/偏空/明确看空]
+**信号统计**：多头 __个 / 空头 __个 / 中性 __个
 
 ---
 
-## 二、动量找时机 ⚡
+## 第二步：行情阶段识别 🎯
 
-### 📊 核心指标
+**当前阶段**: 震荡市 / 趋势加速市 / 反转市
 
-| 指标 | 数值 | 状态 |
-|------|------|------|
-| RSI(14) | XX.XX | 超买/健康/超卖 |
-| KDJ | K:XX D:XX | 金叉/死叉 |
-| 布林带位置 | 上/中/下轨 | 强势/中性/弱势 |
-
-### 💡 综合分析
-
-[分析RSI、KDJ、布林带等指标，判断当前是否适合介入]
-
-**⏰ 时机判断**: [良好时机/观望等待/风险较大]
-**📍 建议介入价位**: [具体价格区间]
+**判定依据**:
+1.
+2.
+3.
 
 ---
 
-## 三、量能验真假 🔍
+## 第三步：动态信号解读 🔄
 
-### 📊 核心指标
+**基于当前阶段（_______）的信号解读**：
 
-| 指标 | 数值 | 解读 |
-|------|------|------|
-| 量比 | X.XX | 放量/缩量/正常 |
-| OBV 5日 | +XX.XX% | 大幅上升/上升/下降 |
-| OBV 20日 | +XX.XX% | 持续流入/变化/流出 |
+**多头信号强度**:
+- [信号1] → [解读]
+- [信号2] → [解读]
 
-### 💡 综合分析
+**空头信号强度**:
+- [信号1] → [解读]
+- [信号2] → [解读]
 
-[分析量价配合情况，判断上涨/下跌的有效性，检查是否存在背离]
-
-**📈 量能判断**: [量价健康/存在隐忧/背离需谨慎]
-
----
-
-## 四、资金判持续性 💰
-
-### 💰 当日资金流
-
-| 类型 | 净流入 | 占比 |
-|------|--------|------|
-| 主力资金 | ±XXXX万元 | ±X.XX% |
-| 超大单 | ±XXXX万元 | ±X.XX% |
-| 大单 | ±XXXX万元 | ±X.XX% |
-| 小单 | ±XXXX万元 | ±X.XX% |
-
-### 💰 5日累计资金流
-
-| 类型 | 累计净流入 | 均值占比 |
-|------|-----------|----------|
-| 主力资金 | ±XXXX万元 | ±X.XX% |
-| 超大单 | ±XXXX万元 | ±X.XX% |
-
-### 💡 综合分析
-
-[分析当日和5日资金流向，判断机构态度和资金面能否支撑趋势持续]
-
-**💎 资金判断**: [资金强劲/支撑有力/分歧加大/持续流出]
+**矛盾信号处理**:
+- [如有] → [判断]
 
 ---
 
-## 五、波动率控风险 🎯
+## 第四步：五维共振验证 🔗
 
-### 📊 核心指标
+### 维度联动验证表
 
-| 指标 | 数值 | 等级 |
-|------|------|------|
-| ATR(14) | X.XXXX元 | 日均波动 |
-| ATR比率 | X.XX% | 低/中/高波动 |
-| 布林带宽度 | XX.XX% | 收口/适中/扩张 |
+| 维度A | 维度B | 共振状态 | 验证结论 |
+|-------|-------|---------|---------|
+| 量能 | 价格 | ✅/❌ | [结论] |
+| 价格 | 趋势 | ✅/❌ | [结论] |
+| 趋势 | 资金 | ✅/❌ | [结论] |
+| 资金 | 量能 | ✅/❌ | [结论] |
+| 动量 | 趋势 | ✅/❌ | [结论] |
 
-### 🛡️ 风险控制建议
+**共振评级**: 🔴强共振 / 🟠中等共振 / 🟡弱共振 / 🟢无共振分歧
 
-- **止损位**: [具体价格，如 MA20/布林下轨]
-- **仓位建议**: [建议仓位范围，如 30-40%]
-- **目标位**: [目标价格，如 布林上轨/前高]
+**共振分析**:
+- 量价关系: _______
+- 资金趋势配合: _______
+- 动量趋势配合: _______
 
 ---
 
-## 综合操作建议
+## 第五步：结论与策略 📝
 
-### 📊 综合评级
+### 综合评级
 
-⭐⭐⭐⭐⭐ (X/5星) - [优秀/良好/一般/较弱]
+⭐⭐⭐⭐⭐ (X/5星) - [明确看多/明确看空/偏多/偏空/中性/等待]
 
-### 📋 操作策略
+### 核心结论
+
+**趋势判断**: _______
+**时机判断**: _______
+
+**关键验证点**:
+1.
+2.
+3.
+
+### 操作策略
 
 #### 稳健型
 
-[详细建议，包括介入价位、止损位、持仓周期等]
+- **介入条件**: _______
+- **止损位**: _______
+- **目标位**: _______
+- **仓位**: _______
 
 #### 激进型
 
-[详细建议，包括试探仓位、加仓条件、目标位等]
+- **介入条件**: _______
+- **止损位**: _______
+- **目标位**: _______
+- **仓位**: _______
 
 ### ⚠️ 风险提示
 
-- [风险点1]
-- [风险点2]
-- [风险点3]
+1.
+2.
+3.
 
 ---
 
-> 💡 **免责声明**: 以上分析仅供参考，不构成投资建议。投资有风险，入市需谨慎！
+> 💡 **免责声明**: 以上分析基于客观信号和五维共振框架推导，仅供参考，不构成投资建议。投资有风险，入市需谨慎！
 
 ---
-*报告生成时间: [当前系统时间]*
+*报告生成时间: [时间戳]*
+*分析框架: 客观共振五维框架*
 *数据来源: akshare (中国股票市场)*
-*技术指标数据来源：AIShareTxt*
+*技术指标计算以及数据汇总：AIShareTxt*
 ```
 
-**格式要点**：
-- 使用标准Markdown标题（# ## ###）
-- 使用Markdown表格展示核心指标
-- 使用引用块（>）突出免责声明
-- 使用分隔线（---）分隔各个维度
-- 使用emoji图标增强可读性（📈⚡🔍💰🎯💡⚠️✅）
-- 综合评级用星星数量直观展示
-- 操作策略使用子标题（####）分类
-- 风险提示用无序列表（-）列出
+---
 
-## Environment Structure
+## 格式要求
+
+- 使用标准Markdown格式
+- 表格展示核心数据
+- emoji增强可读性（📋🎯🔄🔗📝✅❌⚪🔴🟠🟡🟢）
+- 共振评级用彩色圆点标识
+- 文件名必须包含时间戳
+
+## 文件结构
 
 ```
 stock-analysis/
-├── venv/                 # Isolated Python environment (created by setup)
+├── venv/                 # 虚拟环境
 ├── scripts/
-│   ├── setup_venv.py    # Environment setup script
-│   ├── run.ps1          # Windows PowerShell convenience wrapper
-│   ├── run.bat          # Windows Batch convenience wrapper
-│   ├── run.sh           # Linux/macOS convenience wrapper
-│   └── analyze_stock.py # Main analysis script
-└── requirements.txt      # Python dependencies
+│   ├── setup_venv.py    # 环境安装脚本
+│   ├── run.ps1          # Windows PowerShell
+│   ├── run.bat          # Windows Batch
+│   ├── run.sh           # Linux/macOS
+│   └── analyze_stock.py # 主分析脚本
+└── SKILL.md             # 本文件
 ```
 
-## Error Handling
+## 错误处理
 
-- If virtual environment is missing, script returns setup instructions
-- If TA-Lib is not installed, script returns installation link
-- Invalid stock codes return helpful error messages
+- 虚拟环境缺失 → 返回安装步骤
+- TA-Lib未安装 → 返回安装链接
+- 无效股票代码 → 返回错误提示和示例
 
-## Notes
+## 重要说明
 
-- Stock codes must be exactly 6 digits
-- Data sourced from akshare (Chinese stock market)
-- Analysis based on historical OHLCV data
-- Reports for reference only, not investment advice
-- **All analysis reports are automatically saved to the user's current working directory**
-- Report files include: raw data (.txt), JSON data (.json), and Markdown analysis report (.md)
-- Remember to set `USER_WORKING_DIR` environment variable when calling the script from Claude Code
+- 股票代码必须是6位数字
+- 数据来源：akshare（中国股票市场）
+- 报告仅供参考，不构成投资建议
+- 所有报告自动保存到用户当前工作目录
+- **核心**：客观共振五步分析法，拒绝主观预判
