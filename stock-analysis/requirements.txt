@@ -3,7 +3,8 @@
 
 # Stock data processing (Chinese A-shares)
 # Main package for technical analysis
-aishare-txt
+# PyPI official source: https://pypi.org/project/aishare-txt/
+aishare-txt>=0.1.0
 
 # Technical analysis indicators
 # Note: TA-Lib requires system-level installation first
