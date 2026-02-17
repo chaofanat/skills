@@ -1,0 +1,18 @@
+# ntfy 通知配置
+# 任务完成时会自动发送推送通知到指定主题
+
+# 是否启用通知（默认 false，需要手动改为 true）
+enabled: true
+
+# ntfy 服务器地址
+# 本地服务器: http://127.0.0.1 或 http://localhost
+# 官方服务器: https://ntfy.sh (有速率限制)
+# 自建服务器: http://www.chaofan.online:8081
+server: http://www.chaofan.online:8081
+
+# 主题名称（手机 App 订阅的主题）
+topic: celerytask
+
+# 默认优先级 (1=min, 2=low, 3=default, 4=high, 5=max)
+# 任务成功时优先级为 2，失败时为 5
+priority: 3
