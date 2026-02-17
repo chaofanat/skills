@@ -2,3 +2,6 @@ stock-analysis/venv/
 stock-analysis/logs/
 *.pyc
 __pycache__/
+
+# Claude Code local settings
+.claude/
