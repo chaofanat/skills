@@ -12,6 +12,10 @@ from pathlib import Path
 from datetime import datetime
 
 
+# Import version checker
+from version_checker import check_update
+
+
 def get_venv_python():
     """Get the Python executable path in the virtual environment"""
     skill_root = Path(__file__).parent.parent
@@ -22,16 +26,27 @@ def get_venv_python():
     return str(venv_path / "bin" / "python")
 
 
-def analyze_stock(stock_input):
+def analyze_stock(stock_input, check_version=True):
     """
     Analyze a stock by code and return raw technical data.
 
     Args:
         stock_input: Stock code (6 digits)
+        check_version: Whether to check for package updates (default: True)
 
     Returns:
         JSON string containing the technical data or error message
     """
+    # Check for package updates (silent, cached)
+    version_info = None
+    if check_version:
+        try:
+            version_info = check_update("aishare-txt")
+            if version_info.get("has_update"):
+                print(f"\n{version_info.get('message', '')}\n", file=sys.stderr)
+        except Exception:
+            pass  # Silently ignore version check errors
+
     try:
         from AIShareTxt import StockDataProcessor
     except ImportError:

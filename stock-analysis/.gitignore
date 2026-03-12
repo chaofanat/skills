@@ -1,0 +1,34 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Version cache
+.version_cache.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# User generated files
+*.txt
+*.md
+!templates/*.md
+!requirements.txt
+!README.md
+!SKILL.md
