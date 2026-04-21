@@ -4,7 +4,7 @@
 # Stock data processing (Chinese A-shares)
 # Main package for technical analysis
 # PyPI official source: https://pypi.org/project/aishare-txt/
-aishare-txt>=0.1.0
+aishare-txt>=2026.3.11.63
 
 # Technical analysis indicators
 # Note: TA-Lib requires system-level installation first
@@ -21,7 +21,5 @@ scipy>=1.9.0
 # HTTP requests
 requests>=2.28.0
 
-# Optional: AI analysis (requires API keys)
-# Uncomment if you want to use AI features
-# openai>=1.0.0
-# zhipuai>=2.0.0
+# 掘金量化SDK（可选数据源，需设置 DATA_SOURCE=gm 和 GM_TOKEN 环境变量）
+gm>=3.0.0

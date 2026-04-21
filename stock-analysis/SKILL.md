@@ -89,12 +89,23 @@ venv/bin/python scripts/analyze_stock.py 000001
 3. 按照**客观共振五步分析法**生成报告（参考下方）
 4. **评分规则**详见 `templates/strategy_rules.md`
 5. **报告输出格式**详见 `templates/report_template.md`
-6. 保存Markdown报告到用户工作目录
+6. 保存Markdown报告到用户工作目录的 `股票分析报告/{日期}/` 子目录
 
+**正确的调用方式（推荐）**：
+
+使用 `--output-dir` 参数指定输出目录：
 ```bash
 cd C:/Users/CHAOFAN/.claude/skills/stock-analysis
-USER_WORKING_DIR={用户工作目录} venv/Scripts/python.exe scripts/analyze_stock.py {股票代码}
+venv/Scripts/python.exe scripts/analyze_stock.py {股票代码} --output-dir "{用户工作目录}"
 ```
+
+**或者使用环境变量**：
+```bash
+cd C:/Users/CHAOFAN/.claude/skills/stock-analysis
+USER_WORKING_DIR="{用户工作目录}" venv/Scripts/python.exe scripts/analyze_stock.py {股票代码}
+```
+
+**重要**：输出目录必须使用绝对路径，否则文件可能保存到错误的目录。
 
 ---
 
@@ -281,12 +292,42 @@ stock-analysis/
 ├── venv/                    # 虚拟环境
 ├── scripts/                 # 脚本目录
 │   ├── setup_venv.py
+│   ├── version_checker.py   # 版本检查模块
 │   ├── run.ps1 / run.bat / run.sh
 │   └── analyze_stock.py
 ├── templates/               # 规则和模板目录
 │   ├── strategy_rules.md   # 评分规则和策略模板
 │   └── report_template.md  # 报告输出格式
+├── .version_cache.json      # 版本检查缓存（自动生成）
 └── SKILL.md                 # 本文件（核心框架说明）
+```
+
+---
+
+## 版本检查功能 🔄
+
+技能内置**自动版本检查**功能，确保使用最新版本的`aishare-txt`。
+
+### 功能特点
+
+- **自动检查**：每次运行分析时自动检查（24小时缓存）
+- **智能缓存**：避免频繁网络请求，提升响应速度
+- **静默模式**：版本检查在后台进行，不干扰正常使用
+- **更新提醒**：发现新版本时自动显示更新命令
+
+### 手动检查版本
+
+```bash
+# 独立运行版本检查
+venv/Scripts/python.exe scripts/version_checker.py
+```
+
+### 更新依赖
+
+当提示有新版本时，运行：
+
+```bash
+venv/Scripts/python.exe -m pip install --upgrade aishare-txt
 ```
 
 ---
@@ -304,7 +345,9 @@ stock-analysis/
 - 股票代码必须是6位数字
 - 数据来源：akshare（中国股票市场）
 - 报告仅供参考，不构成投资建议
-- 所有报告自动保存到用户当前工作目录
+- 文件按日期自动归档保存到用户工作目录的子文件夹中：
+  - `股票分析报告/{YYYY-MM-DD}/` — 技术分析报告（.txt原始数据 + .md分析报告）
+  - `股票分析数据/{YYYY-MM-DD}/` — 技术指标JSON数据
 - **核心**：客观共振五步分析法 + 概率化评分
 - **评分**：详见 `templates/strategy_rules.md`
 - **格式**：详见 `templates/report_template.md`

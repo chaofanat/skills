@@ -8,6 +8,7 @@ This script outputs raw technical indicator data that can be analyzed by LLM.
 
 import sys
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -98,14 +99,33 @@ def main():
     stock_input = sys.argv[1]
 
     # Parse optional output directory argument
-    # Default to user's current working directory from environment or use skill directory
+    # Priority: 1. --output-dir argument  2. USER_WORKING_DIR env  3. Current directory
     import os
-    output_dir_str = os.environ.get("USER_WORKING_DIR", "")
-    output_dir = Path(output_dir_str) if output_dir_str else Path.cwd()
+    output_dir = None
 
-    # Allow override via --output-dir argument
+    # Check for --output-dir argument
     if len(sys.argv) >= 4 and sys.argv[2] == "--output-dir":
         output_dir = Path(sys.argv[3])
+
+    # Check USER_WORKING_DIR environment variable
+    output_dir_str = os.environ.get("USER_WORKING_DIR", "")
+    if output_dir is None and output_dir_str:
+        output_dir = Path(output_dir_str)
+
+    # Fallback to current working directory
+    if output_dir is None:
+        output_dir = Path.cwd()
+
+    # Ensure output directory exists
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(json.dumps({
+            "error": f"Cannot create output directory: {output_dir}",
+            "message": str(e),
+            "hint": "Use --output-dir to specify a valid path"
+        }, ensure_ascii=False, indent=2))
+        sys.exit(1)
 
     result_json = analyze_stock(stock_input)
     result = json.loads(result_json)
@@ -114,17 +134,27 @@ def main():
     if "report" in result:
         print(result["report"])
 
-        # Save report to file
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Extract trading date from report data (e.g. "数据日期：2026-04-21")
+        # Falls back to system date if parsing fails
+        date_match = re.search(r'数据日期：(\d{4}-\d{2}-\d{2})', result["report"])
+        date_str = date_match.group(1) if date_match else datetime.now().strftime("%Y-%m-%d")
+
+        # Save report to: 股票分析报告/YYYY-MM-DD/
+        report_dir = output_dir / "股票分析报告" / date_str
+        report_dir.mkdir(parents=True, exist_ok=True)
         report_filename = f"stock_report_{stock_input}_{timestamp}.txt"
-        report_path = output_dir / report_filename
+        report_path = report_dir / report_filename
 
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(result["report"])
 
-        # Also save JSON
+        # Save JSON to: 股票分析数据/YYYY-MM-DD/
+        data_dir = output_dir / "股票分析数据" / date_str
+        data_dir.mkdir(parents=True, exist_ok=True)
         json_filename = f"stock_data_{stock_input}_{timestamp}.json"
-        json_path = output_dir / json_filename
+        json_path = data_dir / json_filename
 
         with open(json_path, "w", encoding="utf-8") as f:
             f.write(result_json)
